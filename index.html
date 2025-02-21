@@ -1,7 +1,4 @@
 <!DOCTYPE html>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script type="text/babel" src="rsvp.jsx"></script>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,6 +8,10 @@
 </head>
 <body>
     <div id="root"></div>
+    <!-- Babel script should be placed before your JSX script -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel" src="rsvp.jsx"></script>
     <script type="module" src="index.js"></script>
 </body>
 </html>
+
