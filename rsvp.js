@@ -1,37 +1,32 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const yesButton = document.getElementById("yes-btn");
-    const noButton = document.getElementById("no-btn");
-    const guestsDropdown = document.getElementById("guests");
     const submitButton = document.getElementById("submit-btn");
+    const attendanceDropdown = document.getElementById("attendance");
+    const guestsDropdown = document.getElementById("guests");
 
-    let attending = null;
-
-    yesButton.addEventListener("click", () => {
-        attending = true;
-        guestsDropdown.style.display = "block";
-    });
-
-    noButton.addEventListener("click", () => {
-        attending = false;
-        guestsDropdown.style.display = "none";
+    attendanceDropdown.addEventListener("change", function () {
+        document.getElementById("guest-selection").style.display = this.value === "yes" ? "block" : "none";
     });
 
     submitButton.addEventListener("click", async () => {
-        const guests = attending ? parseInt(document.getElementById("guests").value) : 0;
-        
-        const response = {
-            attending,
-            guests
-        };
+        const name = document.getElementById("name").value;
+        const attending = attendanceDropdown.value;
+        const guests = attending === "yes" ? guestsDropdown.value : "0";
+
+        if (!name || !attending) {
+            alert("Please fill out all fields.");
+            return;
+        }
+
+        const rsvpData = { name, attending, guests };
 
         try {
-            const res = await fetch("https://your-api-gateway-url.amazonaws.com/prod/rsvp", {
+            const response = await fetch("https://1hzxscjflh.execute-api.us-east-1.amazonaws.com/prod", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(response),
+                body: JSON.stringify(rsvpData),
             });
 
-            if (res.ok) {
+            if (response.ok) {
                 alert("RSVP Submitted! Thank you.");
             } else {
                 alert("Submission failed. Please try again.");
