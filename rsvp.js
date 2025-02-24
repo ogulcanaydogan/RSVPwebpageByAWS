@@ -1,3 +1,5 @@
+const apiUrl = "https://1hzxscjflh.execute-api.us-east-1.amazonaws.com/prod/rsvp"; // Correct API URL
+
 document.addEventListener("DOMContentLoaded", () => {
     const submitButton = document.getElementById("submit-btn");
     const attendanceDropdown = document.getElementById("attendance");
@@ -20,20 +22,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const rsvpData = { name, attending, guests };
 
         try {
-            const response = await fetch("https://1hzxscjflh.execute-api.us-east-1.amazonaws.com/prod/rsvp", {
+            const response = await fetch(apiUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(rsvpData),
             });
 
-            if (response.ok) {
-                alert("RSVP Submitted! Thank you.");
-            } else {
-                alert("Submission failed. Please try again.");
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
+
+            const data = await response.json();
+            alert("RSVP Submitted! Thank you.");
         } catch (error) {
             console.error("Error submitting RSVP:", error);
-            alert("An error occurred. Please try again later.");
+            alert("Submission failed. Please try again.");
         }
     });
 });
