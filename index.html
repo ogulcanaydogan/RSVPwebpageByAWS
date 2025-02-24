@@ -37,19 +37,17 @@
             border-radius: 5px;
         }
         .buttons {
-            display: flex;
-            justify-content: space-between;
             margin-top: 20px;
         }
-        button {
-            width: 45%;
+        .submit-btn {
+            width: 100%;
             padding: 10px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
         }
-        .yes-btn { background-color: #4CAF50; color: white; }
-        .no-btn { background-color: #FF5252; color: white; }
     </style>
 </head>
 <body>
@@ -84,39 +82,10 @@
         </div>
         
         <div class="buttons">
-            <button class="yes-btn" onclick="submitRSVP()">Submit</button>
+            <button class="submit-btn" id="submit-btn">Submit</button>
         </div>
     </div>
 
-    <script>
-        document.getElementById("attendance").addEventListener("change", function() {
-            var guestSelection = document.getElementById("guest-selection");
-            if (this.value === "yes") {
-                guestSelection.style.display = "block";
-            } else {
-                guestSelection.style.display = "none";
-            }
-        });
-        
-        function submitRSVP() {
-            var name = document.getElementById("name").value;
-            var attendance = document.getElementById("attendance").value;
-            var guests = document.getElementById("guests").value;
-            
-            if (!name || !attendance) {
-                alert("Please fill out all fields.");
-                return;
-            }
-            
-            var message = `Thank you, ${name}. `;
-            if (attendance === "yes") {
-                message += `We look forward to seeing you with ${guests} guest(s)!`;
-            } else {
-                message += "We're sorry you can't make it.";
-            }
-            
-            alert(message);
-        }
-    </script>
+    <script src="rsvp.js"></script>
 </body>
 </html>

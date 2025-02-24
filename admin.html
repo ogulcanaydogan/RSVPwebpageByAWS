@@ -6,16 +6,21 @@
     <title>RSVP Admin</title>
     <script>
         async function fetchRSVPs() {
-            const response = await fetch("arn:aws:execute-api:us-east-1:211125457564:1hzxscjflh/*/POST/RSVP"); //https://your-api-gateway-url.amazonaws.com/prod/getRSVPs
-            const data = await response.json();
-            const list = document.getElementById("rsvp-list");
-
-            list.innerHTML = "";
-            data.forEach(item => {
-                const entry = document.createElement("li");
-                entry.textContent = `${item.name} - ${item.attending} - Guests: ${item.guests}`;
-                list.appendChild(entry);
-            });
+            try {
+                const response = await fetch("https://1hzxscjflh.execute-api.us-east-1.amazonaws.com/prod/getRSVPs");
+                if (!response.ok) throw new Error("Failed to fetch RSVPs");
+                const data = await response.json();
+                const list = document.getElementById("rsvp-list");
+                list.innerHTML = "";
+                data.forEach(item => {
+                    const entry = document.createElement("li");
+                    entry.textContent = `${item.name} - ${item.attending} - Guests: ${item.guests}`;
+                    list.appendChild(entry);
+                });
+            } catch (error) {
+                console.error("Error fetching RSVPs:", error);
+                alert("Error loading RSVPs.");
+            }
         }
     </script>
 </head>

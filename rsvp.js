@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const rsvpData = { name, attending, guests };
 
         try {
-            const response = await fetch("https://1hzxscjflh.execute-api.us-east-1.amazonaws.com/prod", {
+            const response = await fetch("https://1hzxscjflh.execute-api.us-east-1.amazonaws.com/prod/rsvp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(rsvpData),
