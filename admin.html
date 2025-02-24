@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSVP Admin</title>
+    <script>
+        async function fetchRSVPs() {
+            const response = await fetch("https://your-api-gateway-url.amazonaws.com/prod/getRSVPs"); //https://your-api-gateway-url.amazonaws.com/prod/getRSVPs
+            const data = await response.json();
+            const list = document.getElementById("rsvp-list");
+
+            list.innerHTML = "";
+            data.forEach(item => {
+                const entry = document.createElement("li");
+                entry.textContent = `${item.name} - ${item.attending} - Guests: ${item.guests}`;
+                list.appendChild(entry);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>RSVP Admin Panel</h1>
+    <button onclick="fetchRSVPs()">Load RSVPs</button>
+    <ul id="rsvp-list"></ul>
+</body>
+</html>
