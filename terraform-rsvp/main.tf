@@ -1,6 +1,3 @@
-provider "aws" {
-  region = "us-east-1"
-}
 
 # 1️⃣ REFERENCE EXISTING S3 BUCKET
 data "aws_s3_bucket" "rsvp" {
@@ -152,16 +149,32 @@ resource "aws_lambda_permission" "apigateway_lambda" {
 }
 
 # 🔢 UPLOAD UPDATED HTML AND JS FILES TO S3
+
+# Define the API URL dynamically for use in templates
+data "template_file" "admin_html" {
+  template = file("C:/Users/rx5700xt/Desktop/GitHub/RSVPwebpageByAWS/admin.html")  # Path to your template file
+  vars = {
+    api_url = "https://${aws_api_gateway_rest_api.rsvp_api.id}.execute-api.${var.region}.amazonaws.com/prod/rsvp"
+  }
+}
+
 resource "aws_s3_bucket_object" "admin_html" {
   bucket = data.aws_s3_bucket.rsvp.bucket
   key    = "admin.html"  # Path of the file inside the bucket
-  source = "path/to/admin.html"  # Local path to your updated admin.html
+  content = data.template_file.admin_html.rendered
   acl    = "public-read"  # Set permissions as needed
+}
+
+data "template_file" "rsvp_js" {
+  template = file("c:/Users\rx5700xt/Desktop/GitHub/RSVPwebpageByAWS/rsvp.js")  # Path to your template file
+  vars = {
+    api_url = "https://${aws_api_gateway_rest_api.rsvp_api.id}.execute-api.${var.region}.amazonaws.com/prod/rsvp"
+  }
 }
 
 resource "aws_s3_bucket_object" "rsvp_js" {
   bucket = data.aws_s3_bucket.rsvp.bucket
   key    = "rsvp.js"     # Path of the file inside the bucket
-  source = "path/to/rsvp.js"    # Local path to your updated rsvp.js
-  acl    = "public-read"       # Set permissions as needed
+  content = data.template_file.rsvp_js.rendered    # Rendered content from the template
+  acl    = "public-read"  # Set permissions as needed
 }
