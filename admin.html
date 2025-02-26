@@ -1,32 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RSVP Admin</title>
-    <script>
-        async function fetchRSVPs() {
-            try {
-                const response = await fetch("https://1hzxscjflh.execute-api.us-east-1.amazonaws.com/prod/getRSVPs");
-                if (!response.ok) throw new Error("Failed to fetch RSVPs");
-                const data = await response.json();
-                const list = document.getElementById("rsvp-list");
-                list.innerHTML = "";
-                data.forEach(item => {
-                    const entry = document.createElement("li");
-                    entry.textContent = `${item.name} - ${item.attending} - Guests: ${item.guests}`;
-                    list.appendChild(entry);
-                });
-            } catch (error) {
-                console.error("Error fetching RSVPs:", error);
-                alert("Error loading RSVPs.");
-            }
-        }
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RSVP Admin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #api-url-display {
+      padding: 10px;
+      background: #eee;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+      text-align: center;
+    }
+  </style>
+  <script>
+    // The API URL will be injected by Terraform at runtime.
+    const apiUrl = "${api_url}";
+
+    async function fetchRSVPs() {
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error("Failed to fetch RSVPs");
+        const data = await response.json();
+        const list = document.getElementById("rsvp-list");
+        list.innerHTML = "";
+        data.forEach(item => {
+          const entry = document.createElement("li");
+          entry.textContent = `${item.name} - ${item.attending} - Guests: ${item.guests}`;
+          list.appendChild(entry);
+        });
+      } catch (error) {
+        console.error("Error fetching RSVPs:", error);
+        alert("Error loading RSVPs.");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Display the API URL on the admin panel
+      const apiUrlDisplay = document.getElementById("api-url-display");
+      if (apiUrlDisplay) {
+        apiUrlDisplay.textContent = `API URL: ${apiUrl}`;
+      }
+    });
+  </script>
 </head>
 <body>
-    <h1>RSVP Admin Panel</h1>
-    <button onclick="fetchRSVPs()">Load RSVPs</button>
-    <ul id="rsvp-list"></ul>
+  <!-- Element to display the API URL -->
+  <div id="api-url-display"></div>
+
+  <h1>RSVP Admin Panel</h1>
+  <button onclick="fetchRSVPs()">Load RSVPs</button>
+  <ul id="rsvp-list"></ul>
 </body>
 </html>

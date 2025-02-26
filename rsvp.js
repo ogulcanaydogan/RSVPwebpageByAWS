@@ -1,42 +1,49 @@
-const apiUrl = "https://1hzxscjflh.execute-api.us-east-1.amazonaws.com/prod/rsvp"; // Correct API URL
+// The API URL will be injected by Terraform at runtime.
+const apiUrl = "${api_url}";
 
 document.addEventListener("DOMContentLoaded", () => {
-    const submitButton = document.getElementById("submit-btn");
-    const attendanceDropdown = document.getElementById("attendance");
-    const guestsDropdown = document.getElementById("guests");
+  // Automatically display the API URL at the top of the page
+  const apiUrlDisplay = document.getElementById("api-url-display");
+  if (apiUrlDisplay) {
+    apiUrlDisplay.textContent = `API URL: ${apiUrl}`;
+  }
 
-    attendanceDropdown.addEventListener("change", function () {
-        document.getElementById("guest-selection").style.display = this.value === "yes" ? "block" : "none";
-    });
+  const submitButton = document.getElementById("submit-btn");
+  const attendanceDropdown = document.getElementById("attendance");
+  const guestsDropdown = document.getElementById("guests");
 
-    submitButton.addEventListener("click", async () => {
-        const name = document.getElementById("name").value;
-        const attending = attendanceDropdown.value;
-        const guests = attending === "yes" ? guestsDropdown.value : "0";
+  attendanceDropdown.addEventListener("change", function () {
+    document.getElementById("guest-selection").style.display = this.value === "yes" ? "block" : "none";
+  });
 
-        if (!name || !attending) {
-            alert("Please fill out all fields.");
-            return;
-        }
+  submitButton.addEventListener("click", async () => {
+    const name = document.getElementById("name").value;
+    const attending = attendanceDropdown.value;
+    const guests = attending === "yes" ? guestsDropdown.value : "0";
 
-        const rsvpData = { name, attending, guests };
+    if (!name || !attending) {
+      alert("Please fill out all fields.");
+      return;
+    }
 
-        try {
-            const response = await fetch(apiUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(rsvpData),
-            });
+    const rsvpData = { name, attending, guests };
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(rsvpData),
+      });
 
-            const data = await response.json();
-            alert("RSVP Submitted! Thank you.");
-        } catch (error) {
-            console.error("Error submitting RSVP:", error);
-            alert("Submission failed. Please try again.");
-        }
-    });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      alert("RSVP Submitted! Thank you.");
+    } catch (error) {
+      console.error("Error submitting RSVP:", error);
+      alert("Submission failed. Please try again.");
+    }
+  });
 });
