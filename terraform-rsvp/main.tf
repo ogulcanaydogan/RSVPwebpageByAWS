@@ -1,10 +1,11 @@
-
 # 1️⃣ REFERENCE EXISTING S3 BUCKET
+
 data "aws_s3_bucket" "rsvp" {
   bucket = "rsvp.ogulcanaydogan.com"
 }
 
 # 2️⃣ DYNAMODB TABLE FOR RSVP RESPONSES
+
 resource "aws_dynamodb_table" "rsvp_table" {
   name         = "RSVPResponses"
   billing_mode = "PAY_PER_REQUEST"
@@ -17,12 +18,14 @@ resource "aws_dynamodb_table" "rsvp_table" {
 }
 
 # 3️⃣ ATTACH POLICY TO EXISTING IAM ROLE FOR LAMBDA
+
 resource "aws_iam_role_policy_attachment" "lambda_logs_attach" {
   role       = "aa.LambdaRSVPRole"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 # 4️⃣ PACKAGE LAMBDA FUNCTION
+
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_file = "lambda_function.py"
@@ -30,6 +33,7 @@ data "archive_file" "lambda_zip" {
 }
 
 # 5️⃣ CREATE LAMBDA FUNCTION
+
 resource "aws_lambda_function" "rsvp_lambda" {
   function_name = "rsvpHandler"
   role          = "arn:aws:iam::211125457564:role/aa.LambdaRSVPRole"
@@ -47,6 +51,7 @@ resource "aws_lambda_function" "rsvp_lambda" {
 }
 
 # 6️⃣ API GATEWAY SETUP
+
 resource "aws_api_gateway_rest_api" "rsvp_api" {
   name        = "RSVP API"
   description = "API for wedding RSVP"
@@ -58,7 +63,8 @@ resource "aws_api_gateway_resource" "rsvp_resource" {
   path_part   = "rsvp"
 }
 
-# 7️⃣ ENABLE CORS AND OPTIONS METHOD (FIX CORS ERRORS)
+# 7️⃣ ENABLE CORS AND OPTIONS METHOD
+
 resource "aws_api_gateway_method" "rsvp_options" {
   rest_api_id   = aws_api_gateway_rest_api.rsvp_api.id
   resource_id   = aws_api_gateway_resource.rsvp_resource.id
@@ -67,17 +73,13 @@ resource "aws_api_gateway_method" "rsvp_options" {
 }
 
 resource "aws_api_gateway_integration" "rsvp_options_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.rsvp_api.id
-  resource_id             = aws_api_gateway_resource.rsvp_resource.id
-  http_method             = aws_api_gateway_method.rsvp_options.http_method
-  type                    = "MOCK"
+  rest_api_id = aws_api_gateway_rest_api.rsvp_api.id
+  resource_id = aws_api_gateway_resource.rsvp_resource.id
+  http_method = aws_api_gateway_method.rsvp_options.http_method
+  type        = "MOCK"
 
   request_templates = {
-    "application/json" = <<EOF
-{
-  "statusCode": 200
-}
-EOF
+    "application/json" = "{\"statusCode\": 200}"
   }
 }
 
@@ -88,11 +90,13 @@ resource "aws_api_gateway_method_response" "rsvp_options_response" {
   status_code = "200"
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"  = true
-    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true,
+    "method.response.header.Access-Control-Allow-Methods" = true,
     "method.response.header.Access-Control-Allow-Headers" = true
   }
 }
+
+# Remove Duplicate aws_api_gateway_integration_response Resource
 
 resource "aws_api_gateway_integration_response" "rsvp_options_integration_response" {
   rest_api_id = aws_api_gateway_rest_api.rsvp_api.id
@@ -101,15 +105,16 @@ resource "aws_api_gateway_integration_response" "rsvp_options_integration_respon
   status_code = "200"
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS, POST'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'",
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS, POST'",
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type'"
   }
 
-  depends_on = [aws_api_gateway_integration.rsvp_options_integration]  # ✅ Fix dependency issue
+  depends_on = [aws_api_gateway_integration.rsvp_options_integration]
 }
 
 # 8️⃣ POST METHOD FOR RSVP SUBMISSION
+
 resource "aws_api_gateway_method" "rsvp_post" {
   rest_api_id   = aws_api_gateway_rest_api.rsvp_api.id
   resource_id   = aws_api_gateway_resource.rsvp_resource.id
@@ -127,9 +132,10 @@ resource "aws_api_gateway_integration" "rsvp_lambda_integration" {
 }
 
 # 9️⃣ API DEPLOYMENT
+
 resource "aws_api_gateway_deployment" "rsvp_deployment" {
-  depends_on  = [aws_api_gateway_integration.rsvp_lambda_integration]
   rest_api_id = aws_api_gateway_rest_api.rsvp_api.id
+  depends_on  = [aws_api_gateway_integration.rsvp_lambda_integration]
 }
 
 resource "aws_api_gateway_stage" "rsvp_stage" {
@@ -139,42 +145,27 @@ resource "aws_api_gateway_stage" "rsvp_stage" {
 }
 
 # 🔟 LAMBDA PERMISSION FOR API GATEWAY
+
 resource "aws_lambda_permission" "apigateway_lambda" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.rsvp_lambda.function_name
   principal     = "apigateway.amazonaws.com"
-
-  source_arn = "${aws_api_gateway_rest_api.rsvp_api.execution_arn}/*/*"
+  source_arn    = "${aws_api_gateway_rest_api.rsvp_api.execution_arn}/*/*"
 }
 
 # 🔢 UPLOAD UPDATED HTML AND JS FILES TO S3
 
-# Define the API URL dynamically for use in templates
-data "template_file" "admin_html" {
-  template = file("C:/Users/rx5700xt/Desktop/GitHub/RSVPwebpageByAWS/admin.html")  # Path to your template file
-  vars = {
-    api_url = "https://${aws_api_gateway_rest_api.rsvp_api.id}.execute-api.${var.region}.amazonaws.com/prod/rsvp"
-  }
+resource "aws_s3_object" "admin_html" {
+  bucket = data.aws_s3_bucket.rsvp.id
+  key    = "admin.html"
+  source = "${path.module}/admin.html"
+  content_type = "text/html"
 }
 
-resource "aws_s3_bucket_object" "admin_html" {
-  bucket = data.aws_s3_bucket.rsvp.bucket
-  key    = "admin.html"  # Path of the file inside the bucket
-  content = data.template_file.admin_html.rendered
-  acl    = "public-read"  # Set permissions as needed
-}
-
-data "template_file" "rsvp_js" {
-  template = file("c:/Users\rx5700xt/Desktop/GitHub/RSVPwebpageByAWS/rsvp.js")  # Path to your template file
-  vars = {
-    api_url = "https://${aws_api_gateway_rest_api.rsvp_api.id}.execute-api.${var.region}.amazonaws.com/prod/rsvp"
-  }
-}
-
-resource "aws_s3_bucket_object" "rsvp_js" {
-  bucket = data.aws_s3_bucket.rsvp.bucket
-  key    = "rsvp.js"     # Path of the file inside the bucket
-  content = data.template_file.rsvp_js.rendered    # Rendered content from the template
-  acl    = "public-read"  # Set permissions as needed
+resource "aws_s3_object" "rsvp_js" {
+  bucket = data.aws_s3_bucket.rsvp.id
+  key    = "rsvp.js"
+  source = "${path.module}/rsvp.js"
+  content_type = "application/javascript"
 }
