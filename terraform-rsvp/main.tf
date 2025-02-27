@@ -169,3 +169,5 @@ resource "aws_s3_object" "rsvp_js" {
   source = "${path.module}/rsvp.js"
   content_type = "application/javascript"
 }
+
+

@@ -1,85 +1,70 @@
-import logging
-import boto3
 import json
+import boto3
+import datetime
+import os
 
-# Creating an object
-logger = logging.getLogger()
-
-# Setting the threshold of logger to INFO
-logger.setLevel(logging.INFO)
-
-# ASG boto3 client creation
-asg_client = boto3.client("autoscaling")
-
-original_desired_capacity = "1"
+# Initialize DynamoDB
+dynamodb = boto3.resource("dynamodb")
+table_name = os.getenv("DYNAMODB_TABLE", "RSVPResponses")  # Uses environment variable if set
+table = dynamodb.Table(table_name)
 
 def lambda_handler(event, context):
     try:
-        # Checking if 'detail' exists in the event
-        if 'detail' not in event:
-            logger.error("Event does not contain 'detail' key.")
+        print(f"Received event: {event}")  # Debugging: Log incoming event
+
+        # Check if request body exists
+        if "body" not in event or not event["body"]:
             return {
                 "statusCode": 400,
-                "body": json.dumps("Error: Missing 'detail' key in event")
+                "headers": {"Access-Control-Allow-Origin": "*"},
+                "body": json.dumps({"message": "Request body is missing"})
             }
 
-        # Parsing incoming event data.
-        autoscaling_group_name = event["detail"]["AutoScalingGroupName"]
-        event_description = event["detail-type"]
+        # Parse JSON request body
+        try:
+            body = json.loads(event["body"])
+        except json.JSONDecodeError:
+            return {
+                "statusCode": 400,
+                "headers": {"Access-Control-Allow-Origin": "*"},
+                "body": json.dumps({"message": "Invalid JSON format"})
+            }
 
-        # logging the event name and ASG name
-        logger.info(
-            f"We have just received notice that the Autoscaling Group `{autoscaling_group_name}` has just received an {event_description} event."
-        )
+        print(f"Parsed body: {body}")  # Debugging: Log parsed request body
 
-        # Getting ASG details
-        asg_details = asg_client.describe_auto_scaling_groups(
-            AutoScalingGroupNames=[
-                autoscaling_group_name,
-            ],
-        )
-        asg_environment_tags = asg_details["AutoScalingGroups"][0]["Tags"]
-        new_min_size = asg_details["AutoScalingGroups"][0]["MinSize"]
-        new_max_size = asg_details["AutoScalingGroups"][0]["MaxSize"]
-        new_desired_size = asg_details["AutoScalingGroups"][0]["DesiredCapacity"]
+        # Input validation
+        if "name" not in body or "attending" not in body:
+            return {
+                "statusCode": 400,
+                "headers": {"Access-Control-Allow-Origin": "*"},
+                "body": json.dumps({"message": "Name and attendance status are required!"})
+            }
 
-        logger.info(f"Detected desired capacity was set to: {new_desired_size}")
-        logger.info(f"Detected min size was set to: {new_min_size}")
-        logger.info(f"Detected max size was set to: {new_max_size}")
+        # Prepare RSVP data
+        item = {
+            "id": str(int(datetime.datetime.now().timestamp() * 1000)),  # Unique timestamp ID
+            "name": body["name"],
+            "attending": body["attending"],
+            "guests": int(body["guests"]) if "guests" in body and body["attending"] == "yes" else 0
+        }
 
-        # Getting tags of ASG
-        asg_tags = asg_client.describe_tags(
-            Filters=[
-                {"Name": "auto-scaling-group", "Values": [autoscaling_group_name]}
-            ]
-        )
-        # Getting the tag information, and if matching to `prd`, resetting to the original capacity.
-        for tag in asg_tags["Tags"]:
-            if tag["Key"] == "env":
-                if tag["Value"] == "prd":
-                    logger.info(
-                        f"Production autoscaling group detected. Checking updated capacity status."
-                    )
-                    if new_desired_size != 1:
-                        logger.info(
-                            f"Resetting {autoscaling_group_name} to baseline capacity of {original_desired_capacity}."
-                        )
-                        asg_client.set_desired_capacity(
-                            AutoScalingGroupName=autoscaling_group_name,
-                            DesiredCapacity=1,
-                            HonorCooldown=False,
-                        )
-                elif tag["Value"] == "dev":
-                    logger.info(
-                        f"Development autoscaling group detected. Not taking any action."
-                    )
-                else:
-                    logger.warning(
-                        f"Required tags not found. Please add them to the {autoscaling_group_name}."
-                    )
+        print(f"Storing data in DynamoDB: {item}")  # Debugging: Log stored data
+
+        # Store RSVP data in DynamoDB
+        response = table.put_item(Item=item)
+
+        print(f"DynamoDB response: {response}")  # Debugging: Log DynamoDB response
+
+        return {
+            "statusCode": 200,
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "body": json.dumps({"message": "RSVP recorded successfully!"})
+        }
+
     except Exception as e:
-        logger.error(f"Error processing event: {str(e)}")
+        print(f"Error saving RSVP: {str(e)}")  # Debugging: Log errors
         return {
             "statusCode": 500,
-            "body": json.dumps(f"Error: {str(e)}")
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "body": json.dumps({"message": "Error processing RSVP", "error": str(e)})
         }

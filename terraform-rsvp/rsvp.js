@@ -1,5 +1,5 @@
-// The API URL will be injected by Terraform at runtime.
-const apiUrl = "${api_url}";
+// Ensure that apiUrl is being injected dynamically at runtime
+const apiUrl = "${api_url}";  // This will be replaced during deployment by Terraform
 
 document.addEventListener("DOMContentLoaded", () => {
   // Automatically display the API URL at the top of the page
@@ -47,3 +47,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
