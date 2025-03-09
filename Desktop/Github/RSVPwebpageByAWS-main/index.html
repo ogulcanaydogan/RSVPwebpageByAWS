@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding RSVP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f8f8;
+        }
+        .rsvp-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 350px;
+        }
+        h1 {
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            width: 45%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .yes-btn { background-color: #4CAF50; color: white; }
+        .no-btn { background-color: #FF5252; color: white; }
+    </style>
+</head>
+<body>
+    <div class="rsvp-container">
+        <h1>RSVP</h1>
+        <p><em>for the wedding of</em></p>
+        <h2>Muge & Ogulcan</h2>
+        <hr>
+        <p><strong>The Details</strong></p>
+        <p>Saturday, May 17, 2025</p>
+        <p>7:00 PM</p>
+        <p><strong>Ceremony & Reception</strong></p>
+        <p>Gaia Urla</p>
+        <p> Rüstem, Pınarlı Sk. No:2, 35430 Urla/İzmir, Türkiye</p>
+        <hr>
+        <label for="name">Name</label>
+        <input type="text" id="name" placeholder="Your Name">
+        
+        <label for="attendance">Will you be attending?</label>
+        <select id="attendance">
+            <option value="">Select an option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+        </select>
+        
+        <div id="guest-selection" style="display:none;">
+            <label for="guests">Number of Guests</label>
+            <select id="guests">
+                <option value="1">1 Person</option>
+                <option value="2">2 People</option>
+            </select>
+        </div>
+        
+        <div class="buttons">
+            <button class="yes-btn" onclick="submitRSVP()">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("attendance").addEventListener("change", function() {
+            var guestSelection = document.getElementById("guest-selection");
+            if (this.value === "yes") {
+                guestSelection.style.display = "block";
+            } else {
+                guestSelection.style.display = "none";
+            }
+        });
+        
+        function submitRSVP() {
+            var name = document.getElementById("name").value;
+            var attendance = document.getElementById("attendance").value;
+            var guests = document.getElementById("guests").value;
+            
+            if (!name || !attendance) {
+                alert("Please fill out all fields.");
+                return;
+            }
+            
+            var message = `Thank you, ${name}. `;
+            if (attendance === "yes") {
+                message += `We look forward to seeing you with ${guests} guest(s)!`;
+            } else {
+                message += "We're sorry you can't make it.";
+            }
+            
+            alert(message);
+        }
+    </script>
+</body>
+</html>
