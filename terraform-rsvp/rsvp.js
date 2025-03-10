@@ -1,7 +1,6 @@
-// Ensure that apiUrl is being injected dynamically at runtime
-const apiUrl = "${api_url}";  // This will be replaced during deployment by Terraform
-
 document.addEventListener("DOMContentLoaded", () => {
+  const apiUrl = "https://nq0wpuawx5.execute-api.us-east-1.amazonaws.com/prod/rsvp";  // Injected manually for now
+
   // Automatically display the API URL at the top of the page
   const apiUrlDisplay = document.getElementById("api-url-display");
   if (apiUrlDisplay) {
@@ -17,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   submitButton.addEventListener("click", async () => {
-    const name = document.getElementById("name").value;
+    const name = document.getElementById("name").value.trim();
     const attending = attendanceDropdown.value;
     const guests = attending === "yes" ? guestsDropdown.value : "0";
 
@@ -39,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data = await response.json();
       alert("RSVP Submitted! Thank you.");
     } catch (error) {
       console.error("Error submitting RSVP:", error);
@@ -47,4 +45,3 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-

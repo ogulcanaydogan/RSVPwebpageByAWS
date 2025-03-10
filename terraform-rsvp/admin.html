@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <body>
-    <h1>RSVP Admin Page</h1>
-    <p>API Gateway URL: <a href="{{api_gateway_url}}">{{api_gateway_url}}</a></p>
-    <p>S3 Bucket URL for admin.html: <a href="{{s3_bucket_url}}">{{s3_bucket_url}}</a></p>
-    <p>RSVP JS URL: <a href="{{rsvp_js_url}}">{{rsvp_js_url}}</a></p>
-    <p>Lambda Function Name: {{lambda_function_name}}</p>
-  </body>
-  
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RSVP Admin</title>
@@ -25,10 +17,43 @@
       font-size: 0.9em;
       text-align: center;
     }
+    button {
+      padding: 10px 15px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background: #f4f4f4;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
   </style>
+</head>
+
+<body>
+  <h1>RSVP Admin Page</h1>
+
+  <p>API Gateway URL: <a href="https://nq0wpuawx5.execute-api.us-east-1.amazonaws.com/prod/rsvp">https://nq0wpuawx5.execute-api.us-east-1.amazonaws.com/prod/rsvp</a></p>
+  <p>S3 Bucket URL for admin.html: <a href="https://rsvp.ogulcanaydogan.com.s3.amazonaws.com/admin.html">https://rsvp.ogulcanaydogan.com.s3.amazonaws.com/admin.html</a></p>
+  <p>RSVP JS URL: <a href="https://rsvp.ogulcanaydogan.com.s3.amazonaws.com/rsvp.js">https://rsvp.ogulcanaydogan.com.s3.amazonaws.com/rsvp.js</a></p>
+  <p>Lambda Function Name: rsvpHandler</p>
+
+  <div id="api-url-display">API URL: https://nq0wpuawx5.execute-api.us-east-1.amazonaws.com/prod/rsvp</div>
+
+  <h1>RSVP Admin Panel</h1>
+  <button onclick="fetchRSVPs()">Load RSVPs</button>
+  <ul id="rsvp-list"></ul>
+
   <script>
-    // The API URL will be injected by Terraform at runtime.
-    const apiUrl = "${api_url}";
+    const apiUrl = "https://nq0wpuawx5.execute-api.us-east-1.amazonaws.com/prod/rsvp";
 
     async function fetchRSVPs() {
       try {
@@ -47,31 +72,6 @@
         alert("Error loading RSVPs.");
       }
     }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      // Display the API URL on the admin panel
-      const apiUrlDisplay = document.getElementById("api-url-display");
-      if (apiUrlDisplay) {
-        apiUrlDisplay.textContent = `API URL: ${apiUrl}`;
-      }
-    });
   </script>
-</head>
-
-<body>
-  <!-- Element to display the API URL -->
-  <div id="api-url-display"></div>
-
-  <h1>RSVP Admin Panel</h1>
-  <button onclick="fetchRSVPs()">Load RSVPs</button>
-  <ul id="rsvp-list"></ul>
 </body>
-<body>
-  <h1>RSVP Admin Page</h1>
-  <p>API Gateway URL: <a href="{{api_gateway_url}}">{{api_gateway_url}}</a></p>
-  <p>S3 Bucket URL for admin.html: <a href="{{s3_bucket_url}}">{{s3_bucket_url}}</a></p>
-  <p>RSVP JS URL: <a href="{{rsvp_js_url}}">{{rsvp_js_url}}</a></p>
-  <p>Lambda Function Name: {{lambda_function_name}}</p>
-</body>
-
 </html>
